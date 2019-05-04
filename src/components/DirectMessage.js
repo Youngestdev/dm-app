@@ -16,14 +16,20 @@ class DirectMessage extends React.Component {
 
     // this.GUID = config.GUID;
   }
-  
-  
+
   sendMessage = () => {
-    const { match: { params } } = this.props;
+    const {
+      match: { params }
+    } = this.props;
     chat.sendPrivateMessage(params.uid, this.state.messageText).then(
       message => {
         console.log("Message sent successfully:", message);
-        this.setState({ messageText: null });
+
+        // once the massage is sent, it should also be added to the private messages array so it can be displayed on the screen
+        this.setState(prevState => ({
+          messageText: null,
+          privateMessage: [...prevState.privateMessage, message]
+        }));
       },
       error => {
         if (error.code === "ERR_NOT_A_MEMBER") {
@@ -82,11 +88,9 @@ class DirectMessage extends React.Component {
   };
 
   componentDidMount() {
-
     this.getUser();
     this.messageListener();
     // chat.joinGroup(this.GUID)
-
   }
 
   render() {
@@ -102,14 +106,14 @@ class DirectMessage extends React.Component {
               {this.state.user.uid === data.sender.uid ? (
                 <li className="self">
                   <div className="msg">
-                    <p>{data.sender.uid}</p>
+                    <p>me</p>
                     <div className="message"> {data.data.text} </div>
                   </div>
                 </li>
               ) : (
                 <li className="other">
                   <div className="msg">
-              <p> {data.sender.uid}</p>
+                    <p> {data.sender.uid}</p>
                     <div className="message"> {data.data.text} </div>
                   </div>
                 </li>
