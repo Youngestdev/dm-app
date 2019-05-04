@@ -94,19 +94,22 @@ class DirectMessage extends React.Component {
   }
 
   render() {
+    const {
+      match: { params }
+    } = this.props;
     const { isAuthenticated } = this.state;
     if (!isAuthenticated) {
       return <Redirect to="/" />;
     }
     return (
       <div className="chatWindow">
+        <h2>{params.uid}</h2>
         <ul className="chat" id="chatList">
           {this.state.privateMessage.map(data => (
             <div key={data.id}>
               {this.state.user.uid === data.sender.uid ? (
                 <li className="self">
                   <div className="msg">
-                    <p>me</p>
                     <div className="message"> {data.data.text} </div>
                   </div>
                 </li>
