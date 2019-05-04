@@ -7,7 +7,7 @@ export default class CCManager {
   static appId = config.appId;
   static apiKey = config.apiKey;
   static LISTENER_KEY_GROUP = "grouplistener";
-
+  static USER_LISTENER_KEY_MESSAGE = "privatelistener"
   static init() {
     return CometChat.init(CCManager.appId);
   }
@@ -58,7 +58,7 @@ export default class CCManager {
     return CometChat.joinGroup(GUID, CometChat.GROUP_TYPE.PUBLIC, "");
   }
 
-  static addMessageListener(callback) {
+  static addGroupMessageListener(callback) {
     CometChat.addMessageListener(
       this.LISTENER_KEY_MESSAGE,
       new CometChat.MessageListener({
@@ -67,5 +67,26 @@ export default class CCManager {
         }
       })
     );
+  }
+
+  static addPrivateMessageListener(callback) {
+    CometChat.addMessageListener(
+      this.USER_LISTENER_KEY_MESSAGE,
+      new CometChat.MessageListener({
+        onTextMessageReceived: textMessage => {
+          callback(textMessage);
+        }
+      })
+    );
+  }
+
+  static sendPrivateMessage(UID, message) {
+    const textMessage = this.getTextMessage(UID, message, "user");
+    return CometChat.sendMessage(textMessage);
+  }
+
+  static getOfflineMessages(UID) {
+    const messagesRequest = new CometChat.MessagesRequestBuilder().setUID(UID).setLimit(Infinity).build();
+    return messagesRequest.fetchPrevious()
   }
 }

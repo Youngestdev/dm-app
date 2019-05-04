@@ -1,34 +1,36 @@
 import React from "react";
-import { Redirect, Link } from "react-router-dom";
+import { Redirect } from "react-router-dom";
 import chat from "../lib/chat";
-import config from "../config";
 
-class Groupchat extends React.Component {
+class DirectMessage extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
       receiverID: "",
       messageText: null,
-      groupMessage: [],
+      privateMessage: [],
       user: {},
       isAuthenticated: true
     };
 
-    this.GUID = config.GUID;
+    // this.GUID = config.GUID;
   }
-
+  
+  
   sendMessage = () => {
-    chat.sendGroupMessage(this.GUID, this.state.messageText).then(
+    const { match: { params } } = this.props;
+    chat.sendPrivateMessage(params.uid, this.state.messageText).then(
       message => {
         console.log("Message sent successfully:", message);
         this.setState({ messageText: null });
       },
       error => {
         if (error.code === "ERR_NOT_A_MEMBER") {
-          chat.joinGroup(this.GUID).then(response => {
-            this.sendMessage();
-          });
+          // chat.joinGroup(this.GUID).then(response => {
+          //   this.sendMessage();
+          // })
+          console.log(error);
         }
       }
     );
@@ -66,11 +68,11 @@ class Groupchat extends React.Component {
   };
 
   messageListener = () => {
-    chat.addGroupMessageListener((data, error) => {
+    chat.addPrivateMessageListener((data, error) => {
       if (error) return console.log(`error: ${error}`);
       this.setState(
         prevState => ({
-          groupMessage: [...prevState.groupMessage, data]
+          privateMessage: [...prevState.privateMessage, data]
         }),
         () => {
           this.scrollToBottom();
@@ -80,9 +82,11 @@ class Groupchat extends React.Component {
   };
 
   componentDidMount() {
+
     this.getUser();
     this.messageListener();
     // chat.joinGroup(this.GUID)
+
   }
 
   render() {
@@ -93,19 +97,19 @@ class Groupchat extends React.Component {
     return (
       <div className="chatWindow">
         <ul className="chat" id="chatList">
-          {this.state.groupMessage.map(data => (
+          {this.state.privateMessage.map(data => (
             <div key={data.id}>
               {this.state.user.uid === data.sender.uid ? (
                 <li className="self">
                   <div className="msg">
                     <p>{data.sender.uid}</p>
-                    <div className="message"> {data.data.text}</div>
+                    <div className="message"> {data.data.text} </div>
                   </div>
                 </li>
               ) : (
                 <li className="other">
                   <div className="msg">
-              <p>{<Link to={`/friend/${data.sender.uid}`}> {data.sender.uid } </Link>}</p>
+              <p> {data.sender.uid}</p>
                     <div className="message"> {data.data.text} </div>
                   </div>
                 </li>
@@ -128,4 +132,4 @@ class Groupchat extends React.Component {
   }
 }
 
-export default Groupchat;
+export default DirectMessage;
